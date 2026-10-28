@@ -29,7 +29,7 @@ import {
   getJSONHighlightState,
   getJSONLabelsState,
   getJSONMetadataState,
-  getLogOption,
+  getLogOptionWithDefaults,
   setLogOption,
 } from 'services/store';
 import { clearVariables } from 'services/variableHelpers';
@@ -82,7 +82,7 @@ export class JSONLogsScene extends SceneObjectBase<JSONLogsSceneState> {
       hasMetadata: getJSONMetadataState(),
       JSONFiltersSupported: null,
       lineLimitScene: state.lineLimitScene ?? new LineLimitScene({}),
-      sortOrder: getLogOption<LogsSortOrder>('sortOrder', LogsSortOrder.Descending),
+      sortOrder: getLogOptionWithDefaults('sortOrder'),
       wrapLogMessage: getBooleanLogOption('wrapLogMessage', true),
     });
 

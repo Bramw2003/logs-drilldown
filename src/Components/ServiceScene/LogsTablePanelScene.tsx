@@ -48,7 +48,12 @@ import { setTableFieldOverrides, storeTableFieldConfig } from 'services/logsTabl
 import { narrowLogsSortOrder, unknownToStrings } from 'services/narrowing';
 import { runSceneQueries } from 'services/query';
 import { setControlsExpandedStateFromLocalStorage } from 'services/scenes';
-import { getBooleanLogOption, getLogOption, setDisplayedFieldsInStorage, setLogOption } from 'services/store';
+import {
+  getBooleanLogOption,
+  getLogOptionWithDefaults,
+  setDisplayedFieldsInStorage,
+  setLogOption,
+} from 'services/store';
 import {
   copyText,
   generateLogRowShortlink,
@@ -75,7 +80,7 @@ export class LogsTablePanelScene extends SceneObjectBase<LogsTablePanelSceneStat
   constructor(state: Partial<LogsTablePanelSceneState>) {
     super({
       ...state,
-      sortOrder: getLogOption<LogsSortOrder>('sortOrder', LogsSortOrder.Descending),
+      sortOrder: getLogOptionWithDefaults('sortOrder'),
       isDisabledLineState: false,
     });
 

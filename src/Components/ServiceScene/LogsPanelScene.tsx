@@ -38,9 +38,8 @@ import { narrowLogsSortOrder } from 'services/narrowing';
 import { logsControlsSupported } from 'services/panel';
 import { runSceneQueries } from 'services/query';
 import {
-  getBooleanLogOption,
   getDedupStrategy,
-  getLogOption,
+  getLogOptionWithDefaults,
   LOG_OPTIONS_LOCALSTORAGE_KEY,
   setDedupStrategy,
   setDisplayedFieldsInStorage,
@@ -70,9 +69,9 @@ export class LogsPanelScene extends SceneObjectBase<LogsPanelSceneState> {
   constructor(state: Partial<LogsPanelSceneState>) {
     super({
       dedupStrategy: LogsDedupStrategy.none,
-      prettifyLogMessage: getBooleanLogOption('prettifyLogMessage', false),
-      sortOrder: getLogOption<LogsSortOrder>('sortOrder', LogsSortOrder.Descending),
-      wrapLogMessage: getBooleanLogOption('wrapLogMessage', false),
+      prettifyLogMessage: getLogOptionWithDefaults('prettifyLogMessage'),
+      sortOrder: getLogOptionWithDefaults('sortOrder'),
+      wrapLogMessage: getLogOptionWithDefaults('wrapLogMessage'),
       series: [],
       ...state,
     });
@@ -341,8 +340,9 @@ export class LogsPanelScene extends SceneObjectBase<LogsPanelSceneState> {
       panel.setOption('showTime', true);
     } else {
       panel
-        .setOption('showTime', getBooleanLogOption('showTime', true))
-        .setOption('timestampResolution', getLogOption('timestampResolution', 'ms'))
+        .setOption('fontSize', getLogOptionWithDefaults('fontSize'))
+        .setOption('showTime', getLogOptionWithDefaults('showTime'))
+        .setOption('timestampResolution', getLogOptionWithDefaults('timestampResolution'))
         .setOption('showControls', true)
         .setOption('controlsStorageKey', LOG_OPTIONS_LOCALSTORAGE_KEY)
         .setOption('onLogOptionsChange', this.handleLogOptionsChange)

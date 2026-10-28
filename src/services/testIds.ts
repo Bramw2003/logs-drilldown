@@ -3,6 +3,13 @@ export const testIds = {
     apiKey: 'data-testid ac-api-key',
     apiUrl: 'data-testid ac-api-url',
     container: 'data-testid ac-container',
+    logDefaults: {
+      fontSize: 'data-testid ac-log-default-font-size',
+      lineWrapping: 'data-testid ac-log-default-line-wrapping',
+      sortOrder: 'data-testid ac-log-default-sort-order',
+      submit: 'data-testid ac-log-defaults-submit',
+      timestamps: 'data-testid ac-log-default-timestamps',
+    },
     submit: 'data-testid ac-submit-form',
     defaultColumns: {
       labels: {

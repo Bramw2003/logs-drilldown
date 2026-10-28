@@ -2,8 +2,16 @@ import { DataSourceInstanceListItem } from '@grafana/data';
 import { getDataSourceInstanceList } from '@grafana/plugin-compat/datasources';
 import { SceneObject } from '@grafana/scenes';
 
+import { plugin } from '../module';
 import { isEmbeddedLogs } from './extensions/embedding';
-import { getDefaultDatasourceUid, getExpandedLogsView } from './store';
+import {
+  getBooleanLogOption,
+  getDefaultDatasourceUid,
+  getExpandedLogsView,
+  getLogOption,
+  getLogOptionWithDefaults,
+  LOG_OPTIONS_LOCALSTORAGE_KEY,
+} from './store';
 import pluginJson from 'plugin.json';
 
 jest.mock('@grafana/plugin-compat/datasources', () => ({
@@ -12,6 +20,8 @@ jest.mock('@grafana/plugin-compat/datasources', () => ({
     items.find((i) => i.isDefault)
   ),
 }));
+
+jest.mock('../module', () => ({ plugin: { meta: { jsonData: {} } } }));
 
 jest.mock('./extensions/embedding', () => ({
   isEmbeddedLogs: jest.fn(),
@@ -148,5 +158,57 @@ describe('getExpandedLogsView', () => {
       localStorage.setItem(EMBEDDED_KEY, 'true');
       expect(getExpandedLogsView(sceneRef)).toBe(true);
     });
+  });
+});
+
+describe('log option defaults', () => {
+  const setAdminDefaults = (logDefaults?: Record<string, unknown>) => {
+    plugin.meta.jsonData = { logDefaults };
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+    setAdminDefaults(undefined);
+  });
+
+  it('falls back to the built-in default when nothing is stored or configured', () => {
+    expect(getLogOptionWithDefaults('wrapLogMessage')).toBe(false);
+    expect(getLogOptionWithDefaults('fontSize')).toBe('default');
+    expect(getLogOptionWithDefaults('sortOrder')).toBe('Descending');
+  });
+
+  it('uses the admin default over the built-in default', () => {
+    setAdminDefaults({ wrapLogMessage: true, fontSize: 'small', sortOrder: 'Ascending' });
+    expect(getLogOptionWithDefaults('wrapLogMessage')).toBe(true);
+    expect(getLogOptionWithDefaults('fontSize')).toBe('small');
+    expect(getLogOptionWithDefaults('sortOrder')).toBe('Ascending');
+  });
+
+  it('prefers the user choice over the admin default, including an explicit false', () => {
+    setAdminDefaults({ wrapLogMessage: true, fontSize: 'small' });
+    localStorage.setItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.wrapLogMessage`, 'false');
+    localStorage.setItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.fontSize`, 'default');
+    expect(getLogOptionWithDefaults('wrapLogMessage')).toBe(false);
+    expect(getLogOptionWithDefaults('fontSize')).toBe('default');
+  });
+
+  it('skips invalid admin values', () => {
+    setAdminDefaults({ wrapLogMessage: 'yes', fontSize: 12, sortOrder: 'foo', timestampResolution: 'us' });
+    expect(getLogOptionWithDefaults('wrapLogMessage')).toBe(false);
+    expect(getLogOptionWithDefaults('fontSize')).toBe('default');
+    expect(getLogOptionWithDefaults('sortOrder')).toBe('Descending');
+    expect(getLogOptionWithDefaults('timestampResolution')).toBe('ms');
+  });
+
+  it('skips invalid stored values', () => {
+    setAdminDefaults({ sortOrder: 'Ascending' });
+    localStorage.setItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.sortOrder`, 'foo');
+    expect(getLogOptionWithDefaults('sortOrder')).toBe('Ascending');
+  });
+
+  it('does not change the generic option getters', () => {
+    setAdminDefaults({ wrapLogMessage: true, fontSize: 'small' });
+    expect(getBooleanLogOption('wrapLogMessage', false)).toBe(false);
+    expect(getLogOption('fontSize', 'default')).toBe('default');
   });
 });

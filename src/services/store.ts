@@ -3,9 +3,11 @@ import { getDataSourceInstanceList } from '@grafana/plugin-compat/datasources';
 import { sceneGraph, SceneObject, VariableValue } from '@grafana/scenes';
 import { Options } from '@grafana/schema/dist/esm/raw/composable/logs/panelcfg/x/LogsPanelCfg_types.gen';
 
+import { plugin } from '../module';
 import { isEmbeddedLogs } from './extensions/embedding';
 import { escapePrimaryLabel } from './extensions/links';
 import { isDedupStrategy } from './guards';
+import { isLogDefaultValue, LOG_OPTION_DEFAULTS, LogDefaults } from './logDefaults';
 import { logger } from './logger';
 import { unknownToStrings } from './narrowing';
 import { getRouteParams } from './routing';
@@ -328,6 +330,7 @@ export function setDedupStrategy(sceneRef: SceneObject, strategy: LogsDedupStrat
 // Log panel options
 export const LOG_OPTIONS_LOCALSTORAGE_KEY = `grafana.explore.logs`;
 export const LOG_OPTIONS_PATTERNS_LOCALSTORAGE_KEY = `grafana.explore.logs.patterns`;
+
 export function getLogOption<T>(option: keyof Options, defaultValue: T): T {
   const localStorageResult = localStorage.getItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.${option}`);
   // TODO: narrow stored value
@@ -343,6 +346,25 @@ export function getBooleanLogOption(
     return defaultValue;
   }
   return !(localStorageResult === '' || localStorageResult === 'false');
+}
+
+function getStoredLogDefault<K extends keyof LogDefaults>(option: K): Required<LogDefaults>[K] | undefined {
+  const stored = localStorage.getItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.${option}`);
+  if (stored === null) {
+    return undefined;
+  }
+  const value = typeof LOG_OPTION_DEFAULTS[option] === 'boolean' ? !(stored === '' || stored === 'false') : stored;
+  return isLogDefaultValue(option, value) ? value : undefined;
+}
+
+function getAdminLogDefault<K extends keyof LogDefaults>(option: K): Required<LogDefaults>[K] | undefined {
+  const value = plugin.meta?.jsonData?.logDefaults?.[option];
+  return isLogDefaultValue(option, value) ? value : undefined;
+}
+
+/** Lookup order is the user's saved option, then the admin default, then the built-in default; invalid values are skipped */
+export function getLogOptionWithDefaults<K extends keyof LogDefaults>(option: K): Required<LogDefaults>[K] {
+  return getStoredLogDefault(option) ?? getAdminLogDefault(option) ?? LOG_OPTION_DEFAULTS[option];
 }
 
 export function setLogOption(
