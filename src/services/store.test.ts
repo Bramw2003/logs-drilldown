@@ -4,7 +4,15 @@ import { SceneObject } from '@grafana/scenes';
 
 import { plugin } from '../module';
 import { isEmbeddedLogs } from './extensions/embedding';
-import { getBooleanLogOption, getDefaultDatasourceUid, getExpandedLogsView, getLogOption, LOG_OPTIONS_LOCALSTORAGE_KEY, resetLogOptions } from './store';
+import {
+  getBooleanLogOption,
+  getDefaultDatasourceUid,
+  getExpandedLogsView,
+  getLogOption,
+  getLogOptionWithDefaults,
+  LOG_OPTIONS_LOCALSTORAGE_KEY,
+  resetLogOptions,
+} from './store';
 import pluginJson from 'plugin.json';
 
 jest.mock('@grafana/plugin-compat/datasources', () => ({
@@ -164,33 +172,45 @@ describe('log option defaults', () => {
     setAdminDefaults(undefined);
   });
 
-  it('falls back to the caller default when nothing is stored or configured', () => {
-    expect(getBooleanLogOption('wrapLogMessage', false)).toBe(false);
-    expect(getLogOption('fontSize', 'default')).toBe('default');
+  it('falls back to the built-in default when nothing is stored or configured', () => {
+    expect(getLogOptionWithDefaults('wrapLogMessage')).toBe(false);
+    expect(getLogOptionWithDefaults('fontSize')).toBe('default');
+    expect(getLogOptionWithDefaults('sortOrder')).toBe('Descending');
   });
 
-  it('uses the admin default over the caller default', () => {
-    setAdminDefaults({ wrapLogMessage: true, fontSize: 'small' });
-    expect(getBooleanLogOption('wrapLogMessage', false)).toBe(true);
-    expect(getLogOption('fontSize', 'default')).toBe('small');
+  it('uses the admin default over the built-in default', () => {
+    setAdminDefaults({ wrapLogMessage: true, fontSize: 'small', sortOrder: 'Ascending' });
+    expect(getLogOptionWithDefaults('wrapLogMessage')).toBe(true);
+    expect(getLogOptionWithDefaults('fontSize')).toBe('small');
+    expect(getLogOptionWithDefaults('sortOrder')).toBe('Ascending');
   });
 
   it('prefers the user choice over the admin default, including an explicit false', () => {
     setAdminDefaults({ wrapLogMessage: true, fontSize: 'small' });
     localStorage.setItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.wrapLogMessage`, 'false');
     localStorage.setItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.fontSize`, 'default');
-    expect(getBooleanLogOption('wrapLogMessage', false)).toBe(false);
-    expect(getLogOption('fontSize', 'small')).toBe('default');
+    expect(getLogOptionWithDefaults('wrapLogMessage')).toBe(false);
+    expect(getLogOptionWithDefaults('fontSize')).toBe('default');
   });
 
-  it('ignores admin values for options that are not configurable', () => {
-    setAdminDefaults({ enableLogDetails: true });
-    expect(getBooleanLogOption('enableLogDetails', false)).toBe(false);
+  it('skips invalid admin values', () => {
+    setAdminDefaults({ wrapLogMessage: 'yes', fontSize: 12, sortOrder: 'foo', timestampResolution: 'us' });
+    expect(getLogOptionWithDefaults('wrapLogMessage')).toBe(false);
+    expect(getLogOptionWithDefaults('fontSize')).toBe('default');
+    expect(getLogOptionWithDefaults('sortOrder')).toBe('Descending');
+    expect(getLogOptionWithDefaults('timestampResolution')).toBe('ms');
   });
 
-  it('ignores a non-boolean admin value for a boolean option', () => {
-    setAdminDefaults({ wrapLogMessage: 'yes' });
+  it('skips invalid stored values', () => {
+    setAdminDefaults({ sortOrder: 'Ascending' });
+    localStorage.setItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.sortOrder`, 'foo');
+    expect(getLogOptionWithDefaults('sortOrder')).toBe('Ascending');
+  });
+
+  it('does not change the generic option getters', () => {
+    setAdminDefaults({ wrapLogMessage: true, fontSize: 'small' });
     expect(getBooleanLogOption('wrapLogMessage', false)).toBe(false);
+    expect(getLogOption('fontSize', 'default')).toBe('default');
   });
 
   it('resets user choices to the admin defaults and leaves unrelated options alone', () => {

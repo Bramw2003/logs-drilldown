@@ -1,4 +1,4 @@
-import { LogsDedupStrategy, LogsSortOrder } from '@grafana/data';
+import { LogsDedupStrategy } from '@grafana/data';
 import { getDataSourceInstanceList } from '@grafana/plugin-compat/datasources';
 import { sceneGraph, SceneObject, VariableValue } from '@grafana/scenes';
 import { Options } from '@grafana/schema/dist/esm/raw/composable/logs/panelcfg/x/LogsPanelCfg_types.gen';
@@ -7,7 +7,7 @@ import { plugin } from '../module';
 import { isEmbeddedLogs } from './extensions/embedding';
 import { escapePrimaryLabel } from './extensions/links';
 import { isDedupStrategy } from './guards';
-import { LOG_OPTION_DEFAULTS, LogDefaults, LogFontSize, LogTimestampResolution } from './logDefaults';
+import { isLogDefaultValue, LOG_OPTION_DEFAULTS, LogDefaults } from './logDefaults';
 import { logger } from './logger';
 import { unknownToStrings } from './narrowing';
 import { getRouteParams } from './routing';
@@ -331,22 +331,10 @@ export function setDedupStrategy(sceneRef: SceneObject, strategy: LogsDedupStrat
 export const LOG_OPTIONS_LOCALSTORAGE_KEY = `grafana.explore.logs`;
 export const LOG_OPTIONS_PATTERNS_LOCALSTORAGE_KEY = `grafana.explore.logs.patterns`;
 
-const isLogDefaultKey = (option: string): option is keyof LogDefaults => option in LOG_OPTION_DEFAULTS;
-
-// Lookup order is user localStorage, then admin jsonData, then the caller's default
-function getAdminLogDefault(option: string): unknown {
-  if (!isLogDefaultKey(option)) {
-    return undefined;
-  }
-  return plugin.meta?.jsonData?.logDefaults?.[option];
-}
-
 export function getLogOption<T>(option: keyof Options, defaultValue: T): T {
   const localStorageResult = localStorage.getItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.${option}`);
-  // TODO: narrow stored and admin values
-  return localStorageResult
-    ? (localStorageResult as T)
-    : ((getAdminLogDefault(option) as T | undefined) ?? defaultValue);
+  // TODO: narrow stored value
+  return localStorageResult ? (localStorageResult as T) : defaultValue;
 }
 
 export function getBooleanLogOption(
@@ -355,10 +343,28 @@ export function getBooleanLogOption(
 ): boolean {
   const localStorageResult = localStorage.getItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.${option}`);
   if (localStorageResult === null) {
-    const adminDefault = getAdminLogDefault(option);
-    return typeof adminDefault === 'boolean' ? adminDefault : defaultValue;
+    return defaultValue;
   }
   return !(localStorageResult === '' || localStorageResult === 'false');
+}
+
+function getStoredLogDefault<K extends keyof LogDefaults>(option: K): Required<LogDefaults>[K] | undefined {
+  const stored = localStorage.getItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.${option}`);
+  if (stored === null) {
+    return undefined;
+  }
+  const value = typeof LOG_OPTION_DEFAULTS[option] === 'boolean' ? !(stored === '' || stored === 'false') : stored;
+  return isLogDefaultValue(option, value) ? value : undefined;
+}
+
+function getAdminLogDefault<K extends keyof LogDefaults>(option: K): Required<LogDefaults>[K] | undefined {
+  const value = plugin.meta?.jsonData?.logDefaults?.[option];
+  return isLogDefaultValue(option, value) ? value : undefined;
+}
+
+/** Lookup order is the user's saved option, then the admin default, then the built-in default; invalid values are skipped */
+export function getLogOptionWithDefaults<K extends keyof LogDefaults>(option: K): Required<LogDefaults>[K] {
+  return getStoredLogDefault(option) ?? getAdminLogDefault(option) ?? LOG_OPTION_DEFAULTS[option];
 }
 
 /** Clears the user's saved log options so the admin (or built-in) defaults apply, and returns them */
@@ -367,15 +373,12 @@ export function resetLogOptions(): Required<LogDefaults> {
     localStorage.removeItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.${option}`);
   });
   return {
-    fontSize: getLogOption<LogFontSize>('fontSize', LOG_OPTION_DEFAULTS.fontSize),
-    prettifyLogMessage: getBooleanLogOption('prettifyLogMessage', LOG_OPTION_DEFAULTS.prettifyLogMessage),
-    showTime: getBooleanLogOption('showTime', LOG_OPTION_DEFAULTS.showTime),
-    sortOrder: getLogOption<LogsSortOrder>('sortOrder', LOG_OPTION_DEFAULTS.sortOrder),
-    timestampResolution: getLogOption<LogTimestampResolution>(
-      'timestampResolution',
-      LOG_OPTION_DEFAULTS.timestampResolution
-    ),
-    wrapLogMessage: getBooleanLogOption('wrapLogMessage', LOG_OPTION_DEFAULTS.wrapLogMessage),
+    fontSize: getLogOptionWithDefaults('fontSize'),
+    prettifyLogMessage: getLogOptionWithDefaults('prettifyLogMessage'),
+    showTime: getLogOptionWithDefaults('showTime'),
+    sortOrder: getLogOptionWithDefaults('sortOrder'),
+    timestampResolution: getLogOptionWithDefaults('timestampResolution'),
+    wrapLogMessage: getLogOptionWithDefaults('wrapLogMessage'),
   };
 }
 

@@ -33,15 +33,13 @@ import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'se
 import { getVariableForLabel } from 'services/fields';
 import { LineFilterCaseSensitive, LineFilterOp } from 'services/filterTypes';
 import { isDedupStrategy, isLogsSortOrder } from 'services/guards';
-import { LOG_OPTION_DEFAULTS } from 'services/logDefaults';
 import { logger } from 'services/logger';
 import { narrowLogsSortOrder } from 'services/narrowing';
 import { logsControlsSupported } from 'services/panel';
 import { runSceneQueries } from 'services/query';
 import {
-  getBooleanLogOption,
   getDedupStrategy,
-  getLogOption,
+  getLogOptionWithDefaults,
   LOG_OPTIONS_LOCALSTORAGE_KEY,
   resetLogOptions,
   setDedupStrategy,
@@ -72,9 +70,9 @@ export class LogsPanelScene extends SceneObjectBase<LogsPanelSceneState> {
   constructor(state: Partial<LogsPanelSceneState>) {
     super({
       dedupStrategy: LogsDedupStrategy.none,
-      prettifyLogMessage: getBooleanLogOption('prettifyLogMessage', LOG_OPTION_DEFAULTS.prettifyLogMessage),
-      sortOrder: getLogOption<LogsSortOrder>('sortOrder', LOG_OPTION_DEFAULTS.sortOrder),
-      wrapLogMessage: getBooleanLogOption('wrapLogMessage', LOG_OPTION_DEFAULTS.wrapLogMessage),
+      prettifyLogMessage: getLogOptionWithDefaults('prettifyLogMessage'),
+      sortOrder: getLogOptionWithDefaults('sortOrder'),
+      wrapLogMessage: getLogOptionWithDefaults('wrapLogMessage'),
       series: [],
       ...state,
     });
@@ -349,9 +347,9 @@ export class LogsPanelScene extends SceneObjectBase<LogsPanelSceneState> {
       panel.setOption('showTime', true);
     } else {
       panel
-        .setOption('fontSize', getLogOption('fontSize', LOG_OPTION_DEFAULTS.fontSize))
-        .setOption('showTime', getBooleanLogOption('showTime', LOG_OPTION_DEFAULTS.showTime))
-        .setOption('timestampResolution', getLogOption('timestampResolution', LOG_OPTION_DEFAULTS.timestampResolution))
+        .setOption('fontSize', getLogOptionWithDefaults('fontSize'))
+        .setOption('showTime', getLogOptionWithDefaults('showTime'))
+        .setOption('timestampResolution', getLogOptionWithDefaults('timestampResolution'))
         .setOption('showControls', true)
         .setOption('controlsStorageKey', LOG_OPTIONS_LOCALSTORAGE_KEY)
         .setOption('onLogOptionsChange', this.handleLogOptionsChange)

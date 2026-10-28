@@ -97,6 +97,8 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           });
         };
 
+        const logsPanelScene = findAncestorLogsPanelScene(this);
+
         items.unshift(
           {
             text: t('components.panels.panel-menu.items.text.ui', 'Interface'),
@@ -108,17 +110,17 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
             text: logsExpanded
               ? t('components.panels.panel-menu.items.text.condense-logs', 'Condense logs view')
               : t('components.panels.panel-menu.items.text.expand-logs', 'Expand logs view'),
-          }
+          },
+          ...(logsPanelScene
+            ? [
+                {
+                  iconClassName: 'history' as const,
+                  onClick: logsPanelScene.resetLogOptionsToDefaults,
+                  text: t('components.panels.panel-menu.items.text.reset-log-options', 'Reset log options to defaults'),
+                },
+              ]
+            : [])
         );
-
-        const logsPanelScene = findAncestorLogsPanelScene(this);
-        if (logsPanelScene) {
-          items.splice(2, 0, {
-            iconClassName: 'history',
-            onClick: logsPanelScene.resetLogOptionsToDefaults,
-            text: t('components.panels.panel-menu.items.text.reset-log-options', 'Reset log options to defaults'),
-          });
-        }
       }
 
       let viz;
@@ -307,11 +309,12 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 }
 
 function findAncestorLogsPanelScene(scene: SceneObject) {
-  try {
-    return sceneGraph.getAncestor(scene, LogsPanelScene);
-  } catch (e) {
-    return null;
+  for (let parent = scene.parent; parent; parent = parent.parent) {
+    if (parent instanceof LogsPanelScene) {
+      return parent;
+    }
   }
+  return undefined;
 }
 
 function addVisualizationHeader(items: PanelMenuItem[]) {

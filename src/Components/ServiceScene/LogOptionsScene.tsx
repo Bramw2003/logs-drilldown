@@ -50,9 +50,14 @@ export class LogOptionsScene extends SceneObjectBase<LogOptionsState> {
   }
 
   handleWrapLinesChange = (type: boolean) => {
-    this.getLogsPanelScene()?.setState({ wrapLogMessage: type });
+    // Prettify only applies to wrapped lines, so turning wrapping off turns it off too
+    const prettifyChange = type ? {} : { prettifyLogMessage: false };
+    this.getLogsPanelScene()?.setState({ wrapLogMessage: type, ...prettifyChange });
     setLogOption('wrapLogMessage', type);
-    this.getLogsListScene().setLogsVizOption({ wrapLogMessage: type });
+    if (!type) {
+      setLogOption('prettifyLogMessage', false);
+    }
+    this.getLogsListScene().setLogsVizOption({ wrapLogMessage: type, ...prettifyChange });
   };
 
   handlePrettifyChange = (type: boolean) => {
@@ -110,6 +115,7 @@ function LogOptionsRenderer({ model }: SceneComponentProps<LogOptionsScene>) {
           <InlineField className={styles.buttonGroupWrapper} transparent>
             <RadioButtonGroup
               size="sm"
+              disabled={!state?.wrapLogMessage}
               value={state?.prettifyLogMessage ?? false}
               onChange={model.handlePrettifyChange}
               options={[
