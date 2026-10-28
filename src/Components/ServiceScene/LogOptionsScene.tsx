@@ -49,10 +49,15 @@ export class LogOptionsScene extends SceneObjectBase<LogOptionsState> {
   }
 
   handleWrapLinesChange = (type: boolean) => {
-    this.getLogsPanelScene()?.setState({ prettifyLogMessage: type, wrapLogMessage: type });
+    this.getLogsPanelScene()?.setState({ wrapLogMessage: type });
     setLogOption('wrapLogMessage', type);
+    this.getLogsListScene().setLogsVizOption({ wrapLogMessage: type });
+  };
+
+  handlePrettifyChange = (type: boolean) => {
+    this.getLogsPanelScene()?.setState({ prettifyLogMessage: type });
     setLogOption('prettifyLogMessage', type);
-    this.getLogsListScene().setLogsVizOption({ prettifyLogMessage: type, wrapLogMessage: type });
+    this.getLogsListScene().setLogsVizOption({ prettifyLogMessage: type });
   };
 
   onChangeLogsSortOrder = (sortOrder: LogsSortOrder) => {
@@ -130,6 +135,31 @@ function LogOptionsRenderer({ model }: SceneComponentProps<LogOptionsScene>) {
                     'Disable wrapping of long log lines'
                   ),
                   label: t('components.service-scene.log-options-scene.label.no-wrap', 'No wrap'),
+                  value: false,
+                },
+              ]}
+            />
+          </InlineField>
+          <InlineField className={styles.buttonGroupWrapper} transparent>
+            <RadioButtonGroup
+              size="sm"
+              value={state?.prettifyLogMessage ?? false}
+              onChange={model.handlePrettifyChange}
+              options={[
+                {
+                  description: t(
+                    'components.service-scene.log-options-scene.description.enable-prettifying-of-json-log-lines',
+                    'Enable prettifying of JSON log lines'
+                  ),
+                  label: t('components.service-scene.log-options-scene.label.prettify', 'Prettify'),
+                  value: true,
+                },
+                {
+                  description: t(
+                    'components.service-scene.log-options-scene.description.disable-prettifying-of-json-log-lines',
+                    'Disable prettifying of JSON log lines'
+                  ),
+                  label: t('components.service-scene.log-options-scene.label.no-prettify', 'No prettify'),
                   value: false,
                 },
               ]}

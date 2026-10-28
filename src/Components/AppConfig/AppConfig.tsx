@@ -19,6 +19,7 @@ import { Alert, Button, Checkbox, Field, FieldSet, Input, useStyles2 } from '@gr
 
 import { FeatureFlagContext } from 'Components/FeatureFlagContext';
 import { useDefaultDatasourceUid } from 'services/initialDatasourceInfo';
+import { LogDefaults } from 'services/logDefaults';
 import { logger } from 'services/logger';
 import { getLastUsedDataSourceFromStorage } from 'services/store';
 import { isValidTimeRange } from 'services/utils';
@@ -28,6 +29,8 @@ export type JsonData = {
   /** When set, used as the initial time range when opening the app (if URL has no from/to). */
   defaultTimeRange?: { from: string; to: string };
   interval?: string;
+  /** Managed on the Log defaults tab; kept here so saving this tab doesn't drop it. */
+  logDefaults?: LogDefaults;
   patternsDisabled?: boolean;
 };
 
@@ -315,6 +318,7 @@ const AppConfig = ({ plugin }: Props) => {
                     dataSource: state.dataSource,
                     interval: state.interval,
                     patternsDisabled: state.patternsDisabled,
+                    logDefaults: jsonData?.logDefaults,
                     defaultTimeRange:
                       state.defaultTimeRangeEnabled &&
                       state.defaultTimeRangeFrom.trim() &&

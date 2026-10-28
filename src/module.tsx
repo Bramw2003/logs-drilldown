@@ -60,6 +60,11 @@ const AppConfig = lazy(async () => {
   return await import('./Components/AppConfig/AppConfig');
 });
 
+const LogDefaultsConfig = lazy(async () => {
+  await initPluginI18n();
+  return await import('./Components/AppConfig/LogDefaults/Config');
+});
+
 const DefaultColumnsConfig = lazy(async () => {
   await initPluginI18n();
   return await import('./Components/AppConfig/DefaultColumns/Config');
@@ -90,6 +95,12 @@ export const plugin = new AppPlugin<JsonData>()
     icon: 'columns',
     id: 'admin-default-fields',
     title: 'Default fields',
+  })
+  .addConfigPage({
+    body: LogDefaultsConfig,
+    icon: 'sliders-v-alt',
+    id: 'admin-log-defaults',
+    title: 'Log defaults',
   });
 
 for (const linkConfig of linkConfigs) {

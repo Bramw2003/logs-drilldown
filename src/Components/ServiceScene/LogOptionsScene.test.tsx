@@ -69,10 +69,21 @@ describe('LogOptionsScene', () => {
     expect(screen.getByRole('radio', { name: 'Wrap' })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: 'No wrap' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('radio', { name: 'Wrap' }));
-    expect(setLogOption).toHaveBeenCalledTimes(2);
+    expect(setLogOption).toHaveBeenCalledTimes(1);
     expect(setLogOption).toHaveBeenCalledWith('wrapLogMessage', true);
+    expect(scene.setLogsVizOption).toHaveBeenCalledWith({ wrapLogMessage: true });
+  });
+
+  test('Stores prettify changes separately from wrap (prettifyLogMessage)', async () => {
+    const scene = new LogsListScene({});
+    jest.spyOn(sceneGraph, 'getAncestor').mockReturnValue(scene);
+
+    render(<scene.Component model={scene} />);
+
+    await userEvent.click(screen.getByRole('radio', { name: 'Prettify' }));
+    expect(setLogOption).toHaveBeenCalledTimes(1);
     expect(setLogOption).toHaveBeenCalledWith('prettifyLogMessage', true);
-    expect(scene.setLogsVizOption).toHaveBeenCalledWith({ prettifyLogMessage: true, wrapLogMessage: true });
+    expect(scene.setLogsVizOption).toHaveBeenCalledWith({ prettifyLogMessage: true });
   });
 
   test('Does not show the clear fields button with no fields in display', async () => {

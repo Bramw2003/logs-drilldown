@@ -33,6 +33,7 @@ import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'se
 import { getVariableForLabel } from 'services/fields';
 import { LineFilterCaseSensitive, LineFilterOp } from 'services/filterTypes';
 import { isDedupStrategy, isLogsSortOrder } from 'services/guards';
+import { LOG_OPTION_DEFAULTS } from 'services/logDefaults';
 import { logger } from 'services/logger';
 import { narrowLogsSortOrder } from 'services/narrowing';
 import { logsControlsSupported } from 'services/panel';
@@ -42,6 +43,7 @@ import {
   getDedupStrategy,
   getLogOption,
   LOG_OPTIONS_LOCALSTORAGE_KEY,
+  resetLogOptions,
   setDedupStrategy,
   setDisplayedFieldsInStorage,
 } from 'services/store';
@@ -70,9 +72,9 @@ export class LogsPanelScene extends SceneObjectBase<LogsPanelSceneState> {
   constructor(state: Partial<LogsPanelSceneState>) {
     super({
       dedupStrategy: LogsDedupStrategy.none,
-      prettifyLogMessage: getBooleanLogOption('prettifyLogMessage', false),
-      sortOrder: getLogOption<LogsSortOrder>('sortOrder', LogsSortOrder.Descending),
-      wrapLogMessage: getBooleanLogOption('wrapLogMessage', false),
+      prettifyLogMessage: getBooleanLogOption('prettifyLogMessage', LOG_OPTION_DEFAULTS.prettifyLogMessage),
+      sortOrder: getLogOption<LogsSortOrder>('sortOrder', LOG_OPTION_DEFAULTS.sortOrder),
+      wrapLogMessage: getBooleanLogOption('wrapLogMessage', LOG_OPTION_DEFAULTS.wrapLogMessage),
       series: [],
       ...state,
     });
@@ -273,6 +275,12 @@ export class LogsPanelScene extends SceneObjectBase<LogsPanelSceneState> {
     this.state.body.onOptionsChange(options);
   }
 
+  resetLogOptionsToDefaults = () => {
+    const { prettifyLogMessage, sortOrder, wrapLogMessage, ...vizOptions } = resetLogOptions();
+    this.setState({ prettifyLogMessage, sortOrder, wrapLogMessage });
+    this.setLogsVizOption({ prettifyLogMessage, sortOrder, wrapLogMessage, ...vizOptions });
+  };
+
   clearDisplayedFields = () => {
     if (!this.state.body) {
       return;
@@ -341,8 +349,9 @@ export class LogsPanelScene extends SceneObjectBase<LogsPanelSceneState> {
       panel.setOption('showTime', true);
     } else {
       panel
-        .setOption('showTime', getBooleanLogOption('showTime', true))
-        .setOption('timestampResolution', getLogOption('timestampResolution', 'ms'))
+        .setOption('fontSize', getLogOption('fontSize', LOG_OPTION_DEFAULTS.fontSize))
+        .setOption('showTime', getBooleanLogOption('showTime', LOG_OPTION_DEFAULTS.showTime))
+        .setOption('timestampResolution', getLogOption('timestampResolution', LOG_OPTION_DEFAULTS.timestampResolution))
         .setOption('showControls', true)
         .setOption('controlsStorageKey', LOG_OPTIONS_LOCALSTORAGE_KEY)
         .setOption('onLogOptionsChange', this.handleLogOptionsChange)

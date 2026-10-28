@@ -309,6 +309,19 @@ describe('AppConfig', () => {
         })
       );
     });
+
+    it('keeps the saved logDefaults in the payload', async () => {
+      const logDefaults = { wrapLogMessage: true };
+      const plugin = createPluginMeta({ meta: { ...createPluginMeta().meta, jsonData: { logDefaults } } });
+      renderAppConfig(plugin);
+      fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
+
+      await waitFor(() => expect(mockUpdateAppPluginSettings).toHaveBeenCalled());
+      expect(mockUpdateAppPluginSettings).toHaveBeenCalledWith(
+        'grafana-lokiexplore-app',
+        expect.objectContaining({ jsonData: expect.objectContaining({ logDefaults }) })
+      );
+    });
   });
 });
 

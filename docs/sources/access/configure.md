@@ -1,6 +1,6 @@
 ---
 canonical: https://grafana.com/docs/grafana/latest/explore/simplified-exploration/logs/access/configure/
-description: Describes the plugin configuration settings for Grafana Logs Drilldown, including the Configuration tab, Landing Page default labels, and Default fields.
+description: Describes the plugin configuration settings for Grafana Logs Drilldown, including the Configuration tab, Landing Page default labels, Default fields, and Log defaults.
 keywords:
   - Logs
   - Explore
@@ -11,6 +11,7 @@ keywords:
   - Default labels
   - Landing page
   - Default fields
+  - Log defaults
   - Default time range
 menuTitle: Configure
 title: Configure Grafana Logs Drilldown
@@ -20,7 +21,7 @@ weight: 200
 # Configure Grafana Logs Drilldown
 
 You can use the Configuration page to configure the Grafana Logs Drilldown app like other apps or plugins in Grafana.
-By accessing the app's Administration page, you can view the version history, changelog, configuration, landing page settings, and default fields.
+By accessing the app's Administration page, you can view the version history, changelog, configuration, landing page settings, default fields, and log defaults.
 
 ## Before you begin
 
@@ -71,6 +72,32 @@ Select a setting to configure it:
 - **Disable Loki patterns** controls whether the Patterns tab and the [Loki Patterns API](https://grafana.com/docs/loki/latest/reference/loki-http-api/#patterns-detection) endpoint are used by Logs Drilldown.
 
 After configuring a setting, click **Save settings** to apply the changes.
+
+## Log defaults
+
+The **Log defaults** tab lets administrators set the initial look of the logs view for all users. Users can still change these options in the logs view, and their own choice takes priority over the default.
+
+Each setting shows the value currently in effect. Select a different value to override the built-in default, and click the reset button next to a setting to return it to the built-in default.
+
+| Setting           | Choices                                               | Built-in default |
+| ----------------- | ----------------------------------------------------- | ---------------- |
+| **Line wrapping** | No wrapping, Wrap lines, Wrap lines and prettify JSON | No wrapping      |
+| **Timestamps**    | Hidden, Milliseconds, Nanoseconds                     | Milliseconds     |
+| **Font size**     | Small, Normal                                         | Normal           |
+| **Sort order**    | Newest first, Oldest first                            | Newest first     |
+
+To configure Log defaults:
+
+1. Open the Logs Drilldown app's settings by navigating to **Administration** > **Plugins and data** > **Plugins** > **Grafana Logs Drilldown**.
+1. Select the **Log defaults** tab.
+1. Choose a value for each setting you want to change.
+1. Click **Save settings**.
+
+Users can return to your defaults at any time with **Reset log options to defaults** in the logs panel menu.
+
+{{< admonition type="note" >}}
+Active users must reload the app for configuration changes to take effect.
+{{< /admonition >}}
 
 ## Default fields (Beta)
 

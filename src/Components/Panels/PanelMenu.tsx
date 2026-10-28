@@ -25,6 +25,7 @@ import { FieldsAggregatedBreakdownScene } from 'Components/ServiceScene/Breakdow
 import { FieldsVizPanelWrapper } from 'Components/ServiceScene/Breakdowns/FieldsVizPanelWrapper';
 import { setValueSummaryHeight } from 'Components/ServiceScene/Breakdowns/Panels/ValueSummary';
 import { LogsListScene } from 'Components/ServiceScene/LogsListScene';
+import { LogsPanelScene } from 'Components/ServiceScene/LogsPanelScene';
 import { onExploreLinkClick } from 'Components/ServiceScene/OnExploreLinkClick';
 import { getFeatureFlag } from 'featureFlags/openFeature';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'services/analytics';
@@ -109,6 +110,15 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
               : t('components.panels.panel-menu.items.text.expand-logs', 'Expand logs view'),
           }
         );
+
+        const logsPanelScene = findAncestorLogsPanelScene(this);
+        if (logsPanelScene) {
+          items.splice(2, 0, {
+            iconClassName: 'history',
+            onClick: logsPanelScene.resetLogOptionsToDefaults,
+            text: t('components.panels.panel-menu.items.text.reset-log-options', 'Reset log options to defaults'),
+          });
+        }
       }
 
       let viz;
@@ -294,6 +304,14 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 
     return <></>;
   };
+}
+
+function findAncestorLogsPanelScene(scene: SceneObject) {
+  try {
+    return sceneGraph.getAncestor(scene, LogsPanelScene);
+  } catch (e) {
+    return null;
+  }
 }
 
 function addVisualizationHeader(items: PanelMenuItem[]) {
