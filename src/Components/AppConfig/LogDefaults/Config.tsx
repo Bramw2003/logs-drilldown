@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { css } from '@emotion/css';
 
-import { AppPluginMeta, GrafanaTheme2, PluginConfigPageProps, SelectableValue } from '@grafana/data';
+import { AppPluginMeta, GrafanaTheme2, LogsSortOrder, PluginConfigPageProps, SelectableValue } from '@grafana/data';
 import { t, Trans } from '@grafana/i18n';
 import { updateAppPluginSettings } from '@grafana/plugin-compat/apps';
 import { locationService } from '@grafana/runtime';
@@ -11,11 +11,9 @@ import { Alert, Button, Field, FieldSet, IconButton, RadioButtonGroup, Stack, us
 import type { JsonData } from '../AppConfig';
 import { LOG_OPTION_DEFAULTS, LogDefaults, LogTimestampResolution } from 'services/logDefaults';
 import { logger } from 'services/logger';
-import { getSortOrderChoices, getWrapChoices } from 'services/logOptionChoices';
 import { testIds } from 'services/testIds';
 
 type Timestamps = 'hidden' | LogTimestampResolution;
-type LineWrapping = 'none' | 'wrap' | 'wrap-prettify';
 
 interface Props extends PluginConfigPageProps<AppPluginMeta<JsonData>> {}
 
@@ -87,16 +85,10 @@ const LogDefaultsConfig = ({ plugin }: Props) => {
       testId
     );
 
-  // Mirrors Grafana's line wrapping menu, where prettify JSON is only available together with wrapping
+  // Wrapping and prettifying are one choice, matching the Wrap toggle in the logs view
   const wrap = overrides.wrapLogMessage ?? LOG_OPTION_DEFAULTS.wrapLogMessage;
-  const prettify = overrides.prettifyLogMessage ?? LOG_OPTION_DEFAULTS.prettifyLogMessage;
-  const lineWrapping: LineWrapping = !wrap ? 'none' : prettify ? 'wrap-prettify' : 'wrap';
-  const onChangeLineWrapping = (value: LineWrapping) => {
-    setOverrides((prev) => ({
-      ...prev,
-      prettifyLogMessage: value === 'wrap-prettify',
-      wrapLogMessage: value !== 'none',
-    }));
+  const onChangeLineWrapping = (value: boolean) => {
+    setOverrides((prev) => ({ ...prev, prettifyLogMessage: value, wrapLogMessage: value }));
   };
 
   // Mirrors Grafana's timestamps menu: hidden, or shown at millisecond or nanosecond resolution
@@ -109,7 +101,6 @@ const LogDefaultsConfig = ({ plugin }: Props) => {
     );
   };
 
-  const wrapLabel = (wrapped: boolean) => getWrapChoices().find((choice) => choice.value === wrapped)?.label;
   const { logDefaults: ids } = testIds.appConfig;
 
   return (
@@ -121,17 +112,16 @@ const LogDefaultsConfig = ({ plugin }: Props) => {
           </Trans>
         </p>
 
-        {renderRow<LineWrapping>(
+        {renderRow<boolean>(
           t('components.app-config.log-defaults.line-wrapping', 'Line wrapping'),
           [
-            { label: wrapLabel(false), value: 'none' },
-            { label: wrapLabel(true), value: 'wrap' },
             {
-              label: t('components.app-config.log-defaults.wrap-prettify', 'Wrap and prettify JSON'),
-              value: 'wrap-prettify',
+              label: t('components.service-scene.log-options-scene.label.no-wrap', 'No wrap'),
+              value: false,
             },
+            { label: t('components.service-scene.log-options-scene.label.wrap', 'Wrap'), value: true },
           ],
-          lineWrapping,
+          wrap,
           overrides.wrapLogMessage !== undefined || overrides.prettifyLogMessage !== undefined,
           onChangeLineWrapping,
           () => {
@@ -168,7 +158,16 @@ const LogDefaultsConfig = ({ plugin }: Props) => {
         {renderOption(
           'sortOrder',
           t('components.app-config.log-defaults.sort-order', 'Sort order'),
-          getSortOrderChoices(),
+          [
+            {
+              label: t('components.service-scene.log-options-scene.label.newest-first', 'Newest first'),
+              value: LogsSortOrder.Descending,
+            },
+            {
+              label: t('components.service-scene.log-options-scene.label.oldest-first', 'Oldest first'),
+              value: LogsSortOrder.Ascending,
+            },
+          ],
           ids.sortOrder
         )}
 

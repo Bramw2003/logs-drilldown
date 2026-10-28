@@ -68,9 +68,7 @@ describe('LogDefaultsConfig', () => {
 
   it('shows saved defaults as selected', () => {
     render(<LogDefaultsConfig plugin={createPluginMeta({ logDefaults: { wrapLogMessage: true } })} query={{}} />);
-    expect(
-      within(screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping)).getByLabelText('Wrap')
-    ).toBeChecked();
+    expect(within(screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping)).getByLabelText('Wrap')).toBeChecked();
   });
 
   it('omits logDefaults from the payload when nothing is set', async () => {
@@ -88,9 +86,7 @@ describe('LogDefaultsConfig', () => {
   it('saves the options that were set, including one picked equal to the built-in default, and keeps other settings', async () => {
     const plugin = createPluginMeta({ interval: '7d', logDefaults: { sortOrder: LogsSortOrder.Ascending } });
     render(<LogDefaultsConfig plugin={plugin} query={{}} />);
-    fireEvent.click(
-      within(screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping)).getByLabelText('Wrap')
-    );
+    fireEvent.click(within(screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping)).getByLabelText('Wrap'));
     // The built-in value is already selected, so it takes switching away and back to pin it
     const fontSize = within(screen.getByTestId(testIds.appConfig.logDefaults.fontSize));
     fireEvent.click(fontSize.getByLabelText('Small'));
@@ -106,7 +102,7 @@ describe('LogDefaultsConfig', () => {
           logDefaults: {
             sortOrder: LogsSortOrder.Ascending,
             wrapLogMessage: true,
-            prettifyLogMessage: false,
+            prettifyLogMessage: true,
             fontSize: 'default',
           },
         },
@@ -138,10 +134,10 @@ describe('LogDefaultsConfig', () => {
     );
   });
 
-  it('saves wrap and prettify together for the combined option, and resets both', async () => {
+  it('saves wrap and prettify together, and resets both', async () => {
     render(<LogDefaultsConfig plugin={createPluginMeta()} query={{}} />);
     const lineWrapping = screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping);
-    fireEvent.click(within(lineWrapping).getByLabelText('Wrap and prettify JSON'));
+    fireEvent.click(within(lineWrapping).getByLabelText('Wrap'));
     save();
 
     await waitFor(() => expect(mockUpdateAppPluginSettings).toHaveBeenCalled());
@@ -166,9 +162,7 @@ describe('LogDefaultsConfig', () => {
 
   it('saves hidden timestamps without touching the resolution', async () => {
     render(<LogDefaultsConfig plugin={createPluginMeta()} query={{}} />);
-    fireEvent.click(
-      within(screen.getByTestId(testIds.appConfig.logDefaults.timestamps)).getByLabelText('Hidden')
-    );
+    fireEvent.click(within(screen.getByTestId(testIds.appConfig.logDefaults.timestamps)).getByLabelText('Hidden'));
     save();
 
     await waitFor(() => expect(mockUpdateAppPluginSettings).toHaveBeenCalled());
@@ -180,9 +174,7 @@ describe('LogDefaultsConfig', () => {
 
   it('saves nanosecond timestamps as shown with that resolution', async () => {
     render(<LogDefaultsConfig plugin={createPluginMeta()} query={{}} />);
-    fireEvent.click(
-      within(screen.getByTestId(testIds.appConfig.logDefaults.timestamps)).getByLabelText('Nanoseconds')
-    );
+    fireEvent.click(within(screen.getByTestId(testIds.appConfig.logDefaults.timestamps)).getByLabelText('Nanoseconds'));
     save();
 
     await waitFor(() => expect(mockUpdateAppPluginSettings).toHaveBeenCalled());

@@ -41,7 +41,6 @@ import {
   getDedupStrategy,
   getLogOptionWithDefaults,
   LOG_OPTIONS_LOCALSTORAGE_KEY,
-  resetLogOptions,
   setDedupStrategy,
   setDisplayedFieldsInStorage,
 } from 'services/store';
@@ -272,12 +271,6 @@ export class LogsPanelScene extends SceneObjectBase<LogsPanelSceneState> {
     }
     this.state.body.onOptionsChange(options);
   }
-
-  resetLogOptionsToDefaults = () => {
-    const { prettifyLogMessage, sortOrder, wrapLogMessage, ...vizOptions } = resetLogOptions();
-    this.setState({ prettifyLogMessage, sortOrder, wrapLogMessage });
-    this.setLogsVizOption({ prettifyLogMessage, sortOrder, wrapLogMessage, ...vizOptions });
-  };
 
   clearDisplayedFields = () => {
     if (!this.state.body) {

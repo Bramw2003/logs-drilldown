@@ -11,7 +11,6 @@ import {
   getLogOption,
   getLogOptionWithDefaults,
   LOG_OPTIONS_LOCALSTORAGE_KEY,
-  resetLogOptions,
 } from './store';
 import pluginJson from 'plugin.json';
 
@@ -211,23 +210,5 @@ describe('log option defaults', () => {
     setAdminDefaults({ wrapLogMessage: true, fontSize: 'small' });
     expect(getBooleanLogOption('wrapLogMessage', false)).toBe(false);
     expect(getLogOption('fontSize', 'default')).toBe('default');
-  });
-
-  it('resets user choices to the admin defaults and leaves unrelated options alone', () => {
-    setAdminDefaults({ wrapLogMessage: true, fontSize: 'small' });
-    localStorage.setItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.wrapLogMessage`, 'false');
-    localStorage.setItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.sortOrder`, 'Ascending');
-    localStorage.setItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.enableLogDetails`, 'true');
-
-    expect(resetLogOptions()).toEqual({
-      fontSize: 'small',
-      prettifyLogMessage: false,
-      showTime: true,
-      sortOrder: 'Descending',
-      timestampResolution: 'ms',
-      wrapLogMessage: true,
-    });
-    expect(localStorage.getItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.wrapLogMessage`)).toBeNull();
-    expect(localStorage.getItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.enableLogDetails`)).toBe('true');
   });
 });

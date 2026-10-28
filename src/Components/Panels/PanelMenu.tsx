@@ -25,7 +25,6 @@ import { FieldsAggregatedBreakdownScene } from 'Components/ServiceScene/Breakdow
 import { FieldsVizPanelWrapper } from 'Components/ServiceScene/Breakdowns/FieldsVizPanelWrapper';
 import { setValueSummaryHeight } from 'Components/ServiceScene/Breakdowns/Panels/ValueSummary';
 import { LogsListScene } from 'Components/ServiceScene/LogsListScene';
-import { LogsPanelScene } from 'Components/ServiceScene/LogsPanelScene';
 import { onExploreLinkClick } from 'Components/ServiceScene/OnExploreLinkClick';
 import { getFeatureFlag } from 'featureFlags/openFeature';
 import { reportAppInteraction, USER_EVENTS_ACTIONS, USER_EVENTS_PAGES } from 'services/analytics';
@@ -97,8 +96,6 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           });
         };
 
-        const logsPanelScene = findAncestorLogsPanelScene(this);
-
         items.unshift(
           {
             text: t('components.panels.panel-menu.items.text.ui', 'Interface'),
@@ -110,16 +107,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
             text: logsExpanded
               ? t('components.panels.panel-menu.items.text.condense-logs', 'Condense logs view')
               : t('components.panels.panel-menu.items.text.expand-logs', 'Expand logs view'),
-          },
-          ...(logsPanelScene
-            ? [
-                {
-                  iconClassName: 'history' as const,
-                  onClick: logsPanelScene.resetLogOptionsToDefaults,
-                  text: t('components.panels.panel-menu.items.text.reset-log-options', 'Reset log options to defaults'),
-                },
-              ]
-            : [])
+          }
         );
       }
 
@@ -306,15 +294,6 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 
     return <></>;
   };
-}
-
-function findAncestorLogsPanelScene(scene: SceneObject) {
-  for (let parent = scene.parent; parent; parent = parent.parent) {
-    if (parent instanceof LogsPanelScene) {
-      return parent;
-    }
-  }
-  return undefined;
 }
 
 function addVisualizationHeader(items: PanelMenuItem[]) {

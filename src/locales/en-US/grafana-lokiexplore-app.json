@@ -99,8 +99,7 @@
         "timestamps": "Timestamps",
         "timestamps-hidden": "Hidden",
         "timestamps-ms": "Milliseconds",
-        "timestamps-ns": "Nanoseconds",
-        "wrap-prettify": "Wrap and prettify JSON"
+        "timestamps-ns": "Nanoseconds"
       },
       "max-interval-description": "The maximum interval that can be selected in the time picker within the Grafana Logs Drilldown app. If empty, users can select any time range interval in Grafana Logs Drilldown. <br/>Example values: 7d, 24h, 2w",
       "patterns-placeholder": "7d",
@@ -306,7 +305,6 @@
             "expand-logs": "Expand logs view",
             "explore": "Explore",
             "navigation": "Navigation",
-            "reset-log-options": "Reset log options to defaults",
             "ui": "Interface"
           }
         },
@@ -726,19 +724,15 @@
       },
       "log-options-scene": {
         "description": {
-          "disable-prettifying-of-json-log-lines": "Disable prettifying of JSON log lines",
           "disable-wrapping-of-long-log-lines": "Disable wrapping of long log lines",
-          "enable-prettifying-of-json-log-lines": "Enable prettifying of JSON log lines",
           "enable-wrapping-of-long-log-lines": "Enable wrapping of long log lines",
           "show-results-newest-to-oldest": "Show results newest to oldest",
           "show-results-oldest-to-newest": "Show results oldest to newest"
         },
         "label": {
           "newest-first": "Newest first",
-          "no-prettify": "No prettify",
           "no-wrap": "No wrap",
           "oldest-first": "Oldest first",
-          "prettify": "Prettify",
           "wrap": "Wrap"
         }
       },

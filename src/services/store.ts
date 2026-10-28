@@ -367,21 +367,6 @@ export function getLogOptionWithDefaults<K extends keyof LogDefaults>(option: K)
   return getStoredLogDefault(option) ?? getAdminLogDefault(option) ?? LOG_OPTION_DEFAULTS[option];
 }
 
-/** Clears the user's saved log options so the admin (or built-in) defaults apply, and returns them */
-export function resetLogOptions(): Required<LogDefaults> {
-  Object.keys(LOG_OPTION_DEFAULTS).forEach((option) => {
-    localStorage.removeItem(`${LOG_OPTIONS_LOCALSTORAGE_KEY}.${option}`);
-  });
-  return {
-    fontSize: getLogOptionWithDefaults('fontSize'),
-    prettifyLogMessage: getLogOptionWithDefaults('prettifyLogMessage'),
-    showTime: getLogOptionWithDefaults('showTime'),
-    sortOrder: getLogOptionWithDefaults('sortOrder'),
-    timestampResolution: getLogOptionWithDefaults('timestampResolution'),
-    wrapLogMessage: getLogOptionWithDefaults('wrapLogMessage'),
-  };
-}
-
 export function setLogOption(
   option: keyof Options | 'maxLines' | 'controlsExpanded' | 'wrapText',
   value: string | number | boolean

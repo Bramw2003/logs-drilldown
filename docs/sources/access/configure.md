@@ -79,12 +79,12 @@ The **Log defaults** tab lets administrators set the initial look of the logs vi
 
 Each setting shows the value currently in effect. Select a different value to override the built-in default, and click the reset button next to a setting to return it to the built-in default.
 
-| Setting           | Choices                               | Built-in default |
-| ----------------- | ------------------------------------- | ---------------- |
-| **Line wrapping** | No wrap, Wrap, Wrap and prettify JSON | No wrap          |
-| **Timestamps**    | Hidden, Milliseconds, Nanoseconds     | Milliseconds     |
-| **Font size**     | Small, Normal                         | Normal           |
-| **Sort order**    | Newest first, Oldest first            | Newest first     |
+| Setting           | Choices                           | Built-in default |
+| ----------------- | --------------------------------- | ---------------- |
+| **Line wrapping** | No wrap, Wrap                     | No wrap          |
+| **Timestamps**    | Hidden, Milliseconds, Nanoseconds | Milliseconds     |
+| **Font size**     | Small, Normal                     | Normal           |
+| **Sort order**    | Newest first, Oldest first        | Newest first     |
 
 To configure Log defaults:
 
@@ -92,8 +92,6 @@ To configure Log defaults:
 1. Select the **Log defaults** tab.
 1. Choose a value for each setting you want to change.
 1. Click **Save settings**.
-
-Users can return to your defaults at any time with **Reset log options to defaults** in the logs panel menu.
 
 {{< admonition type="note" >}}
 Active users must reload the app for configuration changes to take effect.

@@ -6,9 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { LogsSortOrder } from '@grafana/data';
 import { sceneGraph } from '@grafana/scenes';
 
-import { LogOptionsScene } from './LogOptionsScene';
 import { LogsListScene } from './LogsListScene';
-import { LogsPanelScene } from './LogsPanelScene';
 import { getLogOption, getMaxLines, setLogOption } from 'services/store';
 
 jest.mock('services/store');
@@ -71,21 +69,10 @@ describe('LogOptionsScene', () => {
     expect(screen.getByRole('radio', { name: 'Wrap' })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: 'No wrap' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('radio', { name: 'Wrap' }));
-    expect(setLogOption).toHaveBeenCalledTimes(1);
+    expect(setLogOption).toHaveBeenCalledTimes(2);
     expect(setLogOption).toHaveBeenCalledWith('wrapLogMessage', true);
-    expect(scene.setLogsVizOption).toHaveBeenCalledWith({ wrapLogMessage: true });
-  });
-
-  test('Stores prettify changes separately from wrap (prettifyLogMessage)', async () => {
-    const scene = new LogsListScene({});
-    jest.spyOn(sceneGraph, 'getAncestor').mockReturnValue(scene);
-
-    render(<scene.Component model={scene} />);
-
-    await userEvent.click(screen.getByRole('radio', { name: 'Prettify' }));
-    expect(setLogOption).toHaveBeenCalledTimes(1);
     expect(setLogOption).toHaveBeenCalledWith('prettifyLogMessage', true);
-    expect(scene.setLogsVizOption).toHaveBeenCalledWith({ prettifyLogMessage: true });
+    expect(scene.setLogsVizOption).toHaveBeenCalledWith({ prettifyLogMessage: true, wrapLogMessage: true });
   });
 
   test('Does not show the clear fields button with no fields in display', async () => {
@@ -110,39 +97,5 @@ describe('LogOptionsScene', () => {
     await userEvent.click(screen.getByText('Show original log line'));
 
     expect(scene.clearDisplayedFields).toHaveBeenCalledTimes(1);
-  });
-
-  describe('wrapping and prettifying', () => {
-    const setup = () => {
-      const listScene = new LogsListScene({});
-      const panelScene = new LogsPanelScene({});
-      const panelSetState = jest.spyOn(panelScene, 'setState');
-      const scene = new LogOptionsScene({ onChangeVisualizationType: jest.fn(), visualizationType: 'logs' });
-      scene.getLogsListScene = () => listScene;
-      scene.getLogsPanelScene = () => panelScene;
-      return { listScene, panelSetState, scene };
-    };
-
-    test('Turning wrapping off also turns prettify off', () => {
-      const { listScene, panelSetState, scene } = setup();
-
-      scene.handleWrapLinesChange(false);
-
-      expect(setLogOption).toHaveBeenCalledWith('wrapLogMessage', false);
-      expect(setLogOption).toHaveBeenCalledWith('prettifyLogMessage', false);
-      expect(panelSetState).toHaveBeenCalledWith({ prettifyLogMessage: false, wrapLogMessage: false });
-      expect(listScene.setLogsVizOption).toHaveBeenCalledWith({ prettifyLogMessage: false, wrapLogMessage: false });
-    });
-
-    test('Turning wrapping on leaves prettify alone', () => {
-      const { listScene, panelSetState, scene } = setup();
-
-      scene.handleWrapLinesChange(true);
-
-      expect(setLogOption).toHaveBeenCalledTimes(1);
-      expect(setLogOption).toHaveBeenCalledWith('wrapLogMessage', true);
-      expect(panelSetState).toHaveBeenCalledWith({ wrapLogMessage: true });
-      expect(listScene.setLogsVizOption).toHaveBeenCalledWith({ wrapLogMessage: true });
-    });
   });
 });

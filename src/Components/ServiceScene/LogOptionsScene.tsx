@@ -14,7 +14,6 @@ import { LogsListScene } from './LogsListScene';
 import { LogsPanelScene } from './LogsPanelScene';
 import { LogsPanelHeaderActions } from 'Components/Table/LogsHeaderActions';
 import { logger } from 'services/logger';
-import { getSortOrderChoices, getWrapChoices } from 'services/logOptionChoices';
 import { narrowLogsSortOrder } from 'services/narrowing';
 import { logsControlsSupported } from 'services/panel';
 import { LogsVisualizationType, setLogOption } from 'services/store';
@@ -50,20 +49,10 @@ export class LogOptionsScene extends SceneObjectBase<LogOptionsState> {
   }
 
   handleWrapLinesChange = (type: boolean) => {
-    // Prettify only applies to wrapped lines, so turning wrapping off turns it off too
-    const prettifyChange = type ? {} : { prettifyLogMessage: false };
-    this.getLogsPanelScene()?.setState({ wrapLogMessage: type, ...prettifyChange });
+    this.getLogsPanelScene()?.setState({ prettifyLogMessage: type, wrapLogMessage: type });
     setLogOption('wrapLogMessage', type);
-    if (!type) {
-      setLogOption('prettifyLogMessage', false);
-    }
-    this.getLogsListScene().setLogsVizOption({ wrapLogMessage: type, ...prettifyChange });
-  };
-
-  handlePrettifyChange = (type: boolean) => {
-    this.getLogsPanelScene()?.setState({ prettifyLogMessage: type });
     setLogOption('prettifyLogMessage', type);
-    this.getLogsListScene().setLogsVizOption({ prettifyLogMessage: type });
+    this.getLogsListScene().setLogsVizOption({ prettifyLogMessage: type, wrapLogMessage: type });
   };
 
   onChangeLogsSortOrder = (sortOrder: LogsSortOrder) => {
@@ -99,7 +88,24 @@ function LogOptionsRenderer({ model }: SceneComponentProps<LogOptionsScene>) {
           <InlineField className={styles.buttonGroupWrapper} transparent>
             <RadioButtonGroup
               size="sm"
-              options={getSortOrderChoices()}
+              options={[
+                {
+                  description: t(
+                    'components.service-scene.log-options-scene.description.show-results-newest-to-oldest',
+                    'Show results newest to oldest'
+                  ),
+                  label: t('components.service-scene.log-options-scene.label.newest-first', 'Newest first'),
+                  value: LogsSortOrder.Descending,
+                },
+                {
+                  description: t(
+                    'components.service-scene.log-options-scene.description.show-results-oldest-to-newest',
+                    'Show results oldest to newest'
+                  ),
+                  label: t('components.service-scene.log-options-scene.label.oldest-first', 'Oldest first'),
+                  value: LogsSortOrder.Ascending,
+                },
+              ]}
               value={state?.sortOrder}
               onChange={model.onChangeLogsSortOrder}
             />
@@ -109,30 +115,21 @@ function LogOptionsRenderer({ model }: SceneComponentProps<LogOptionsScene>) {
               size="sm"
               value={state?.wrapLogMessage ?? false}
               onChange={model.handleWrapLinesChange}
-              options={getWrapChoices()}
-            />
-          </InlineField>
-          <InlineField className={styles.buttonGroupWrapper} transparent>
-            <RadioButtonGroup
-              size="sm"
-              disabled={!state?.wrapLogMessage}
-              value={state?.prettifyLogMessage ?? false}
-              onChange={model.handlePrettifyChange}
               options={[
                 {
                   description: t(
-                    'components.service-scene.log-options-scene.description.enable-prettifying-of-json-log-lines',
-                    'Enable prettifying of JSON log lines'
+                    'components.service-scene.log-options-scene.description.enable-wrapping-of-long-log-lines',
+                    'Enable wrapping of long log lines'
                   ),
-                  label: t('components.service-scene.log-options-scene.label.prettify', 'Prettify'),
+                  label: t('components.service-scene.log-options-scene.label.wrap', 'Wrap'),
                   value: true,
                 },
                 {
                   description: t(
-                    'components.service-scene.log-options-scene.description.disable-prettifying-of-json-log-lines',
-                    'Disable prettifying of JSON log lines'
+                    'components.service-scene.log-options-scene.description.disable-wrapping-of-long-log-lines',
+                    'Disable wrapping of long log lines'
                   ),
-                  label: t('components.service-scene.log-options-scene.label.no-prettify', 'No prettify'),
+                  label: t('components.service-scene.log-options-scene.label.no-wrap', 'No wrap'),
                   value: false,
                 },
               ]}
