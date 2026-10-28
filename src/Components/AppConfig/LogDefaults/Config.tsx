@@ -9,11 +9,19 @@ import { locationService } from '@grafana/runtime';
 import { Alert, Button, Field, FieldSet, IconButton, RadioButtonGroup, Stack, useStyles2 } from '@grafana/ui';
 
 import type { JsonData } from '../AppConfig';
-import { LOG_OPTION_DEFAULTS, LogDefaults, LogTimestampResolution } from 'services/logDefaults';
+import {
+  LOG_FONT_SIZES,
+  LOG_OPTION_DEFAULTS,
+  LOG_TIMESTAMP_RESOLUTIONS,
+  LogDefaults,
+  LogFontSize,
+  LogTimestampResolution,
+} from 'services/logDefaults';
 import { logger } from 'services/logger';
 import { testIds } from 'services/testIds';
 
-type Timestamps = 'hidden' | LogTimestampResolution;
+const TIMESTAMPS_HIDDEN = 'hidden';
+type Timestamps = typeof TIMESTAMPS_HIDDEN | LogTimestampResolution;
 
 interface Props extends PluginConfigPageProps<AppPluginMeta<JsonData>> {}
 
@@ -94,13 +102,25 @@ const LogDefaultsConfig = ({ plugin }: Props) => {
   // Mirrors Grafana's timestamps menu: hidden, or shown at millisecond or nanosecond resolution
   const showTime = overrides.showTime ?? LOG_OPTION_DEFAULTS.showTime;
   const resolution = overrides.timestampResolution ?? LOG_OPTION_DEFAULTS.timestampResolution;
-  const timestamps: Timestamps = showTime ? resolution : 'hidden';
+  const timestamps: Timestamps = showTime ? resolution : TIMESTAMPS_HIDDEN;
   const onChangeTimestamps = (value: Timestamps) => {
     setOverrides((prev) =>
-      value === 'hidden' ? { ...prev, showTime: false } : { ...prev, showTime: true, timestampResolution: value }
+      value === TIMESTAMPS_HIDDEN
+        ? { ...prev, showTime: false }
+        : { ...prev, showTime: true, timestampResolution: value }
     );
   };
 
+  const timestampLabels: Record<Timestamps, string> = {
+    [TIMESTAMPS_HIDDEN]: t('components.app-config.log-defaults.timestamps-hidden', 'Hidden'),
+    ms: t('components.app-config.log-defaults.timestamps-ms', 'Milliseconds'),
+    ns: t('components.app-config.log-defaults.timestamps-ns', 'Nanoseconds'),
+  };
+  const timestampChoices: Timestamps[] = [TIMESTAMPS_HIDDEN, ...LOG_TIMESTAMP_RESOLUTIONS];
+  const fontSizeLabels: Record<LogFontSize, string> = {
+    default: t('components.app-config.log-defaults.font-size-normal', 'Normal'),
+    small: t('components.app-config.log-defaults.font-size-small', 'Small'),
+  };
   const { logDefaults: ids } = testIds.appConfig;
 
   return (
@@ -132,11 +152,10 @@ const LogDefaultsConfig = ({ plugin }: Props) => {
         )}
         {renderRow<Timestamps>(
           t('components.app-config.log-defaults.timestamps', 'Timestamps'),
-          [
-            { label: t('components.app-config.log-defaults.timestamps-hidden', 'Hidden'), value: 'hidden' },
-            { label: t('components.app-config.log-defaults.timestamps-ms', 'Milliseconds'), value: 'ms' },
-            { label: t('components.app-config.log-defaults.timestamps-ns', 'Nanoseconds'), value: 'ns' },
-          ],
+          timestampChoices.map((value) => ({
+            label: timestampLabels[value],
+            value,
+          })),
           timestamps,
           overrides.showTime !== undefined || overrides.timestampResolution !== undefined,
           onChangeTimestamps,
@@ -149,10 +168,7 @@ const LogDefaultsConfig = ({ plugin }: Props) => {
         {renderOption(
           'fontSize',
           t('components.app-config.log-defaults.font-size', 'Font size'),
-          [
-            { label: t('components.app-config.log-defaults.font-size-small', 'Small'), value: 'small' },
-            { label: t('components.app-config.log-defaults.font-size-normal', 'Normal'), value: 'default' },
-          ],
+          LOG_FONT_SIZES.map((value) => ({ label: fontSizeLabels[value], value })),
           ids.fontSize
         )}
         {renderOption(
