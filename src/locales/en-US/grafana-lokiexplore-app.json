@@ -95,16 +95,12 @@
         "line-wrapping": "Line wrapping",
         "reset": "Reset to default",
         "save": "Save settings",
-        "sort-newest": "Newest first",
-        "sort-oldest": "Oldest first",
         "sort-order": "Sort order",
         "timestamps": "Timestamps",
         "timestamps-hidden": "Hidden",
         "timestamps-ms": "Milliseconds",
         "timestamps-ns": "Nanoseconds",
-        "wrap-none": "No wrapping",
-        "wrap-prettify": "Wrap lines and prettify JSON",
-        "wrap-wrap": "Wrap lines"
+        "wrap-prettify": "Wrap and prettify JSON"
       },
       "max-interval-description": "The maximum interval that can be selected in the time picker within the Grafana Logs Drilldown app. If empty, users can select any time range interval in Grafana Logs Drilldown. <br/>Example values: 7d, 24h, 2w",
       "patterns-placeholder": "7d",

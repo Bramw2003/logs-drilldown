@@ -60,7 +60,7 @@ describe('LogDefaultsConfig', () => {
 
     const selected = (testId: string, label: string) =>
       expect(within(screen.getByTestId(testId)).getByLabelText(label)).toBeChecked();
-    selected(testIds.appConfig.logDefaults.lineWrapping, 'No wrapping');
+    selected(testIds.appConfig.logDefaults.lineWrapping, 'No wrap');
     selected(testIds.appConfig.logDefaults.timestamps, 'Milliseconds');
     selected(testIds.appConfig.logDefaults.fontSize, 'Normal');
     selected(testIds.appConfig.logDefaults.sortOrder, 'Newest first');
@@ -69,7 +69,7 @@ describe('LogDefaultsConfig', () => {
   it('shows saved defaults as selected', () => {
     render(<LogDefaultsConfig plugin={createPluginMeta({ logDefaults: { wrapLogMessage: true } })} query={{}} />);
     expect(
-      within(screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping)).getByLabelText('Wrap lines')
+      within(screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping)).getByLabelText('Wrap')
     ).toBeChecked();
   });
 
@@ -89,7 +89,7 @@ describe('LogDefaultsConfig', () => {
     const plugin = createPluginMeta({ interval: '7d', logDefaults: { sortOrder: LogsSortOrder.Ascending } });
     render(<LogDefaultsConfig plugin={plugin} query={{}} />);
     fireEvent.click(
-      within(screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping)).getByLabelText('Wrap lines')
+      within(screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping)).getByLabelText('Wrap')
     );
     // The built-in value is already selected, so it takes switching away and back to pin it
     const fontSize = within(screen.getByTestId(testIds.appConfig.logDefaults.fontSize));
@@ -127,7 +127,7 @@ describe('LogDefaultsConfig', () => {
     fireEvent.click(screen.getByTestId(`${testIds.appConfig.logDefaults.lineWrapping} reset`));
 
     expect(
-      within(screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping)).getByLabelText('No wrapping')
+      within(screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping)).getByLabelText('No wrap')
     ).toBeChecked();
     save();
 
@@ -141,7 +141,7 @@ describe('LogDefaultsConfig', () => {
   it('saves wrap and prettify together for the combined option, and resets both', async () => {
     render(<LogDefaultsConfig plugin={createPluginMeta()} query={{}} />);
     const lineWrapping = screen.getByTestId(testIds.appConfig.logDefaults.lineWrapping);
-    fireEvent.click(within(lineWrapping).getByLabelText('Wrap lines and prettify JSON'));
+    fireEvent.click(within(lineWrapping).getByLabelText('Wrap and prettify JSON'));
     save();
 
     await waitFor(() => expect(mockUpdateAppPluginSettings).toHaveBeenCalled());

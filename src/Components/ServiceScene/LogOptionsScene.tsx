@@ -14,6 +14,7 @@ import { LogsListScene } from './LogsListScene';
 import { LogsPanelScene } from './LogsPanelScene';
 import { LogsPanelHeaderActions } from 'Components/Table/LogsHeaderActions';
 import { logger } from 'services/logger';
+import { getSortOrderChoices, getWrapChoices } from 'services/logOptionChoices';
 import { narrowLogsSortOrder } from 'services/narrowing';
 import { logsControlsSupported } from 'services/panel';
 import { LogsVisualizationType, setLogOption } from 'services/store';
@@ -93,24 +94,7 @@ function LogOptionsRenderer({ model }: SceneComponentProps<LogOptionsScene>) {
           <InlineField className={styles.buttonGroupWrapper} transparent>
             <RadioButtonGroup
               size="sm"
-              options={[
-                {
-                  description: t(
-                    'components.service-scene.log-options-scene.description.show-results-newest-to-oldest',
-                    'Show results newest to oldest'
-                  ),
-                  label: t('components.service-scene.log-options-scene.label.newest-first', 'Newest first'),
-                  value: LogsSortOrder.Descending,
-                },
-                {
-                  description: t(
-                    'components.service-scene.log-options-scene.description.show-results-oldest-to-newest',
-                    'Show results oldest to newest'
-                  ),
-                  label: t('components.service-scene.log-options-scene.label.oldest-first', 'Oldest first'),
-                  value: LogsSortOrder.Ascending,
-                },
-              ]}
+              options={getSortOrderChoices()}
               value={state?.sortOrder}
               onChange={model.onChangeLogsSortOrder}
             />
@@ -120,24 +104,7 @@ function LogOptionsRenderer({ model }: SceneComponentProps<LogOptionsScene>) {
               size="sm"
               value={state?.wrapLogMessage ?? false}
               onChange={model.handleWrapLinesChange}
-              options={[
-                {
-                  description: t(
-                    'components.service-scene.log-options-scene.description.enable-wrapping-of-long-log-lines',
-                    'Enable wrapping of long log lines'
-                  ),
-                  label: t('components.service-scene.log-options-scene.label.wrap', 'Wrap'),
-                  value: true,
-                },
-                {
-                  description: t(
-                    'components.service-scene.log-options-scene.description.disable-wrapping-of-long-log-lines',
-                    'Disable wrapping of long log lines'
-                  ),
-                  label: t('components.service-scene.log-options-scene.label.no-wrap', 'No wrap'),
-                  value: false,
-                },
-              ]}
+              options={getWrapChoices()}
             />
           </InlineField>
           <InlineField className={styles.buttonGroupWrapper} transparent>

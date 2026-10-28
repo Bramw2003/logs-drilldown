@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { css } from '@emotion/css';
 
-import { AppPluginMeta, GrafanaTheme2, LogsSortOrder, PluginConfigPageProps, SelectableValue } from '@grafana/data';
+import { AppPluginMeta, GrafanaTheme2, PluginConfigPageProps, SelectableValue } from '@grafana/data';
 import { t, Trans } from '@grafana/i18n';
 import { updateAppPluginSettings } from '@grafana/plugin-compat/apps';
 import { locationService } from '@grafana/runtime';
@@ -11,6 +11,7 @@ import { Alert, Button, Field, FieldSet, IconButton, RadioButtonGroup, Stack, us
 import type { JsonData } from '../AppConfig';
 import { LOG_OPTION_DEFAULTS, LogDefaults, LogTimestampResolution } from 'services/logDefaults';
 import { logger } from 'services/logger';
+import { getSortOrderChoices, getWrapChoices } from 'services/logOptionChoices';
 import { testIds } from 'services/testIds';
 
 type Timestamps = 'hidden' | LogTimestampResolution;
@@ -108,6 +109,7 @@ const LogDefaultsConfig = ({ plugin }: Props) => {
     );
   };
 
+  const wrapLabel = (wrapped: boolean) => getWrapChoices().find((choice) => choice.value === wrapped)?.label;
   const { logDefaults: ids } = testIds.appConfig;
 
   return (
@@ -122,10 +124,10 @@ const LogDefaultsConfig = ({ plugin }: Props) => {
         {renderRow<LineWrapping>(
           t('components.app-config.log-defaults.line-wrapping', 'Line wrapping'),
           [
-            { label: t('components.app-config.log-defaults.wrap-none', 'No wrapping'), value: 'none' },
-            { label: t('components.app-config.log-defaults.wrap-wrap', 'Wrap lines'), value: 'wrap' },
+            { label: wrapLabel(false), value: 'none' },
+            { label: wrapLabel(true), value: 'wrap' },
             {
-              label: t('components.app-config.log-defaults.wrap-prettify', 'Wrap lines and prettify JSON'),
+              label: t('components.app-config.log-defaults.wrap-prettify', 'Wrap and prettify JSON'),
               value: 'wrap-prettify',
             },
           ],
@@ -166,16 +168,7 @@ const LogDefaultsConfig = ({ plugin }: Props) => {
         {renderOption(
           'sortOrder',
           t('components.app-config.log-defaults.sort-order', 'Sort order'),
-          [
-            {
-              label: t('components.app-config.log-defaults.sort-newest', 'Newest first'),
-              value: LogsSortOrder.Descending,
-            },
-            {
-              label: t('components.app-config.log-defaults.sort-oldest', 'Oldest first'),
-              value: LogsSortOrder.Ascending,
-            },
-          ],
+          getSortOrderChoices(),
           ids.sortOrder
         )}
 
